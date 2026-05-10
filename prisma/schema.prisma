@@ -1,0 +1,434 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USERS
+// ============================================
+
+model User {
+  id                  String   @id @default(uuid())
+  email               String   @unique
+  name                String?
+  password            String   // hashed with bcrypt
+  phone               String?
+  companyName         String?
+  companyRegistration String? // SSM number
+  role                String   @default("user") // user, admin, super_admin
+  emailVerified       Boolean  @default(false) // Email verification status
+  verificationToken   String?  // Token for email verification
+  verificationExpires DateTime? // Token expiry time
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  employers      Employer[]
+  subscriptions  Subscription[]
+  payments       Payment[]
+  alerts         Alert[]
+  auditLogs      AuditLog[]
+  chatMessages   ChatMessage[] @relation("ChatThreadUser")
+  sentMessages   ChatMessage[] @relation("ChatMessageSender")
+  createdAnnouncements Announcement[] @relation("AnnouncementCreator")
+  announcementDismissals AnnouncementDismissal[]
+  appealLetters      AppealLetter[]
+
+  @@map("users")
+}
+
+// ============================================
+// EMPLOYERS (PERKESO-Registered)
+// ============================================
+
+model Employer {
+  id                      String    @id @default(uuid())
+  userId                  String
+  employerCode            String    @db.Char(12)
+  employerName            String
+  employerNameMalay       String?
+  businessType            String?
+  ssmNumber               String?
+  ssmDate                 DateTime?
+  perkesoRegistrationDate DateTime?
+  perkesoBranch           String?
+  addressLine1            String
+  addressLine2            String?
+  addressLine3            String?
+  city                    String
+  state                   String
+  postcode                String    @db.Char(5)
+  country                 String    @default("MALAYSIA")
+  phonePrimary            String
+  phoneAlternative        String?
+  fax                     String?
+  emailPrimary            String
+  emailAlternative        String?
+  website                 String?
+  msicCode                String?   @db.Char(4)
+  msicDescription         String?
+  industrySector          String?
+  totalEmployees          Int       @default(0)
+  employeeCategory        String?
+  bankName                String?
+  bankAccountNumber       String?
+  bankAccountHolder       String?
+  bankBranch              String?
+  isActive                Boolean   @default(true)
+  isVerified              Boolean   @default(false)
+  verificationDate        DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  deletedAt               DateTime?
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employees   Employee[]
+  submissions Submission[]
+
+  @@unique([userId, employerCode])
+  @@index([userId])
+  @@index([employerCode])
+  @@index([state])
+  @@index([msicCode])
+  @@index([isActive])
+  @@map("employers")
+}
+
+// ============================================
+// EMPLOYEES (PERKESO-Registered Workers)
+// ============================================
+
+model Employee {
+  id                       String    @id @default(uuid())
+  employerId               String
+  icNumber                 String
+  name                     String
+  nameMalay                String?
+  dateOfBirth              DateTime?
+  gender                   String?
+  nationality              String    @default("MALAYSIAN")
+  passportNumber           String?
+  passportExpiry           DateTime?
+  workerType               String    @default("LOCAL")
+  category                 String    @default("JENIS1")
+  isDisabled               Boolean   @default(false)
+  employmentDate           DateTime
+  employmentType           String?
+  jobTitle                 String?
+  jobDescription           String?
+  department               String?
+  salary                   Decimal   @db.Decimal(10, 2)
+  salaryType               String    @default("MONTHLY")
+  overtimeEligible         Boolean   @default(true)
+  commissionEligible       Boolean   @default(false)
+  allowanceAmount          Decimal   @default(0) @db.Decimal(10, 2)
+  enteredAfter55           Boolean   @default(false)
+  eisNoContribution57      Boolean   @default(false)
+  isSkbbkEligible          Boolean   @default(true)
+  skbbkPhase               Int       @default(1)
+  firstPerkesoRegistration DateTime?
+  previousEmployerCode     String?
+  isConcurrentEmployment   Boolean   @default(false)
+  addressLine1             String?
+  addressLine2             String?
+  addressLine3             String?
+  city                     String?
+  state                    String?
+  postcode                 String?   @db.Char(5)
+  phonePrimary             String?
+  phoneAlternative         String?
+  email                    String?
+  bankName                 String?
+  bankAccountNumber        String?
+  bankAccountHolder        String?
+  bankBranch               String?
+  isActive                 Boolean   @default(true)
+  terminationDate          DateTime?
+  terminationReason        String?
+  lastContributionMonth    Int?
+  lastContributionYear     Int?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  deletedAt                DateTime?
+
+  employer      Employer       @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  contributions Contribution[]
+
+  @@unique([employerId, icNumber])
+  @@index([employerId])
+  @@index([icNumber])
+  @@index([isActive])
+  @@index([category])
+  @@index([isSkbbkEligible, skbbkPhase])
+  @@map("employees")
+}
+
+// ============================================
+// SUBMISSIONS (Monthly Caruman)
+// ============================================
+
+model Submission {
+  id                        String    @id @default(uuid())
+  employerId                String
+  contributionMonth         Int
+  contributionYear          Int
+  deadlineDate              DateTime
+  submittedAt               DateTime?
+  totalEmployees            Int       @default(0)
+  totalSalary               Decimal   @db.Decimal(12, 2)
+  totalEmployerContribution Decimal   @db.Decimal(12, 2) @default(0)
+  totalEmployeeContribution Decimal   @db.Decimal(12, 2) @default(0)
+  grandTotal                Decimal   @db.Decimal(12, 2) @default(0)
+  textFileUrl               String?
+  textFileContent           String?   @db.Text
+  status                    String    @default("draft") // draft, paid
+  paidAt                    DateTime?
+  paymentReference          String?   @db.Text
+  latePenalty               Decimal   @default(0) @db.Decimal(10, 2)
+  monthsLate                Int       @default(0)
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  employer      Employer       @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  contributions Contribution[]
+
+  @@unique([employerId, contributionMonth, contributionYear])
+  @@index([employerId])
+  @@index([deadlineDate])
+  @@index([status])
+  @@index([contributionYear, contributionMonth])
+  @@map("submissions")
+}
+
+// ============================================
+// CONTRIBUTIONS (Per Employee Breakdown)
+// ============================================
+
+model Contribution {
+  id            String    @id @default(uuid())
+  submissionId  String
+  employeeId    String
+  month         Int
+  year          Int
+  salary        Decimal   @db.Decimal(10, 2)
+  socsoEmployer Decimal   @default(0) @db.Decimal(10, 2)
+  socsoEmployee Decimal   @default(0) @db.Decimal(10, 2)
+  eisEmployer   Decimal   @default(0) @db.Decimal(10, 2)
+  eisEmployee   Decimal   @default(0) @db.Decimal(10, 2)
+  skbbkEmployee Decimal   @default(0) @db.Decimal(10, 2)
+  totalEmployer Decimal   @db.Decimal(10, 2)
+  totalEmployee Decimal   @db.Decimal(10, 2)
+  createdAt     DateTime  @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  employee   Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([employeeId])
+  @@index([year, month])
+  @@map("contributions")
+}
+
+// ============================================
+// SUBSCRIPTIONS
+// ============================================
+
+model Subscription {
+  id                    String    @id @default(uuid())
+  userId                String
+  status                String    @default("trial")
+  planType              String    @default("basic")
+  billplzCustomerId     String?
+  billplzSubscriptionId String?
+  trialStart            DateTime?
+  trialEnd              DateTime?
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  cancelAtPeriodEnd     Boolean   @default(false)
+  cancelledAt           DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@unique([userId])
+  @@index([userId, status])
+  @@map("subscriptions")
+}
+
+// ============================================
+// CHAT & SUPPORT
+// ============================================
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String   // The regular user involved in the chat
+  senderId  String   // The actual user who sent it (either the user or the admin)
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation("ChatThreadUser", fields: [userId], references: [id], onDelete: Cascade)
+  sender    User     @relation("ChatMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("chat_messages")
+}
+
+
+// ============================================
+// PAYMENTS (Billplz Transaction History)
+// ============================================
+
+model Payment {
+  id                String    @id @default(uuid())
+  userId            String
+  subscriptionId    String?
+  amount            Decimal   @db.Decimal(10, 2)
+  currency          String    @default("MYR")
+  status            String
+  billplzChargeId   String?   @unique
+  billplzPaymentUrl String?
+  paidAt            DateTime?
+  description       String?
+  metadata          Json?
+  failureReason     String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@index([billplzChargeId])
+  @@map("payments")
+}
+
+// ============================================
+// ALERTS/NOTIFICATIONS
+// ============================================
+
+model Alert {
+  id           String    @id @default(uuid())
+  userId       String
+  employerId   String?
+  submissionId String?
+  type         String
+  title        String
+  message      String
+  isRead       Boolean   @default(false)
+  readAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("alerts")
+}
+
+// ============================================
+// AUDIT LOGS (Compliance)
+// ============================================
+
+model AuditLog {
+  id         String    @id @default(uuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================
+// ANNOUNCEMENTS (Super Admin)
+// ============================================
+
+model Announcement {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   @db.Text
+  type        String   @default("info") // info, warning, success, error
+  isDismissable Boolean @default(true)
+  isActive    Boolean  @default(true)
+  publishedAt DateTime?
+  expiresAt   DateTime?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator     User              @relation("AnnouncementCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  dismissals  AnnouncementDismissal[]
+
+  @@index([isActive, publishedAt])
+  @@index([type])
+  @@map("announcements")
+}
+
+model AnnouncementDismissal {
+  id          String   @id @default(uuid())
+  announcementId String
+  userId      String
+  dismissedAt DateTime @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, userId])
+  @@index([userId])
+  @@index([announcementId])
+  @@map("announcement_dismissals")
+}
+
+// ============================================
+// APPEAL LETTERS (Surat Rayuan PERKESO)
+// ============================================
+
+model AppealLetter {
+  id          String   @id @default(uuid())
+  userId      String
+  letterType  String   // "faedah" | "kompaun"
+  companyName String
+  employerCode String  @db.Char(12)
+
+  // Penalty details
+  penaltyAmount    Decimal  @db.Decimal(10, 2)
+  penaltyPeriod    String   // e.g., "Jan 2024 - Mar 2024"
+  reason           String   // predefined reason category
+  customReason     String?  @db.Text // custom explanation
+
+  // Status & output
+  status        String   @default("draft") // draft, requested, paid, generated, rejected
+  generatedPdf  String?  // path to generated PDF
+  price         Decimal  @default(10.00) @db.Decimal(10, 2)
+  adminNote     String?  @db.Text // admin remarks
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  submittedAt DateTime?
+  paidAt      DateTime?
+  generatedAt DateTime?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@map("appeal_letters")
+}
