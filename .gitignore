@@ -66,3 +66,11 @@ CRITICAL_DEPLOYMENT_CHECKLIST.md
 QUICK_DEPLOY_CARD.txt
 .claude/
 .qwen/
+
+# Security documentation and scripts
+ACTION_REQUIRED.txt
+README_SECURITY_CLEANUP.md
+SECURITY_CLEANUP_COMPLETE.md
+ROTATE_SECRETS.ps1
+secrets_to_remove.txt
+backup_secrets_*
