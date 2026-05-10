@@ -68,16 +68,16 @@ DATABASE_URL=postgresql://postgres:YOUR_ACTUAL_PASSWORD@YOUR_VPS_IP:5434/textfil
 
 # Authentication (Generate NEW secret - DO NOT reuse)
 NEXTAUTH_SECRET=GENERATE_WITH_OPENSSL_RAND_BASE64_32
-NEXTAUTH_URL=https://waju.my
+NEXTAUTH_URL=https://caruman.waju.my
 
 # App Info
 NEXT_PUBLIC_APP_NAME=TextFileSKBBK SaaS
-NEXT_PUBLIC_APP_URL=https://waju.my
+NEXT_PUBLIC_APP_URL=https://caruman.waju.my
 
 # Email (Dynamail)
 SMTP_HOST=mail9.dynamail.asia
 SMTP_PORT=587
-SMTP_USER=walter@waju.my
+SMTP_USER=walter@caruman.waju.my
 SMTP_PASSWORD=YOUR_ACTUAL_SMTP_PASSWORD
 SMTP_SECURE=false
 
@@ -118,7 +118,7 @@ npx prisma db pull
 ## Step 5: Verify Deployment
 
 ✅ **Check these:**
-- [ ] Website accessible at https://waju.my
+- [ ] Website accessible at https://caruman.waju.my
 - [ ] Login page loads without errors
 - [ ] Database connection shows "healthy"
 - [ ] No authentication errors in logs
@@ -214,8 +214,8 @@ git push -u origin main
 
 ## 📞 Support
 
-- Coolify Dashboard: http://waju.my:8000
+- Coolify Dashboard: http://caruman.waju.my:8000
 - Database Container: `b859kqfsu6plkz3z84bh6nli`
-- Production URL: https://waju.my
+- Production URL: https://caruman.waju.my
 
 **⚠️ Remember**: Never share credentials or commit them to Git!
