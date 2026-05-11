@@ -66,6 +66,10 @@ CRITICAL_DEPLOYMENT_CHECKLIST.md
 QUICK_DEPLOY_CARD.txt
 .claude/
 .qwen/
+docker-compose.zip
+DEPLOY_TO_VPS.ps1
+DEPLOY_TO_VPS.sh
+PERKESO_*.txt
 
 # Security documentation and scripts
 ACTION_REQUIRED.txt
