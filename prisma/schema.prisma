@@ -23,6 +23,8 @@ model User {
   emailVerified       Boolean  @default(false) // Email verification status
   verificationToken   String?  // Token for email verification
   verificationExpires DateTime? // Token expiry time
+  resetPasswordToken  String?  // Token for password reset
+  resetPasswordExpires DateTime? // Token expiry time for password reset
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 

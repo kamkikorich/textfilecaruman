@@ -176,7 +176,7 @@ export default function NewSubmissionPage() {
     setLoading(true)
 
     try {
-      const res = await fetch(`/api/submissions/${submission.id}/generate`, {
+      const res = await fetch(`/api/submissions/${submission?.id}/generate`, {
         method: "POST",
       })
       if (res.ok) {
@@ -289,15 +289,15 @@ export default function NewSubmissionPage() {
                 </div>
                 <div className="p-6 relative z-10">
                   <p className="text-blue-200 text-xs font-bold uppercase tracking-widest mb-1">Grand Total</p>
-                  <h3 className="text-3xl font-black text-white">RM {Number(submission.grandTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                  <h3 className="text-3xl font-black text-white">RM {Number(submission?.grandTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                   <div className="mt-4 pt-4 border-t border-blue-500/30 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-blue-200">Majikan</span>
-                      <span className="font-bold text-white">RM {Number(submission.totalEmployerContribution).toFixed(2)}</span>
+                      <span className="font-bold text-white">RM {Number(submission?.totalEmployerContribution).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-blue-200">Pekerja</span>
-                      <span className="font-bold text-white">RM {Number(submission.totalEmployeeContribution).toFixed(2)}</span>
+                      <span className="font-bold text-white">RM {Number(submission?.totalEmployeeContribution).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -332,7 +332,7 @@ export default function NewSubmissionPage() {
                       <UserCheck className="w-4 h-4" />
                       <span className="text-xs font-bold uppercase tracking-wider">Pekerja</span>
                     </div>
-                    <p className="text-2xl font-bold text-white">{submission.totalEmployees}</p>
+                    <p className="text-2xl font-bold text-white">{submission?.totalEmployees}</p>
                   </div>
                   <div className="p-5 rounded-2xl border border-white/[0.08] bg-slate-900/80">
                     <div className="flex items-center gap-2 text-slate-500 mb-2">
@@ -348,7 +348,7 @@ export default function NewSubmissionPage() {
                       <Coins className="w-4 h-4" />
                       <span className="text-xs font-bold uppercase tracking-wider">Jumlah Gaji</span>
                     </div>
-                    <p className="text-2xl font-bold text-white">RM {Number(submission.totalSalary).toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-white">RM {Number(submission?.totalSalary).toLocaleString()}</p>
                   </div>
                 </div>
 
@@ -379,7 +379,7 @@ export default function NewSubmissionPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/[0.04]">
-                        {submission.contributions.map((c) => (
+                        {submission?.contributions.map((c) => (
                           <tr key={c.id} className="hover:bg-white/[0.02] transition-colors">
                             <td className="px-4 py-3">
                               <p className="font-bold text-white uppercase truncate max-w-[120px]">{c.employee.name}</p>
@@ -434,7 +434,7 @@ export default function NewSubmissionPage() {
                         size="sm"
                         onClick={handleDownload}
                         className="gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 shadow-lg shadow-blue-500/25 focus-ring"
-                        disabled={!submission.textFileContent}
+                        disabled={!submission?.textFileContent}
                       >
                         <FileDown className="w-4 h-4" />
                         Muat Turun
@@ -442,21 +442,21 @@ export default function NewSubmissionPage() {
                     </div>
                   </div>
                   <div className="p-0">
-                    {!submission.textFileContent ? (
+                    {!submission?.textFileContent ? (
                       <div className="text-center py-12">
                         <p className="text-slate-500">Menjana fail teks...</p>
                       </div>
                     ) : preview ? (
                       <div className="relative group">
                         <pre className="p-6 text-[11px] overflow-x-auto font-mono text-emerald-400/90 leading-relaxed max-h-[300px] bg-slate-950/50">
-                          {submission.textFileContent}
+                          {submission?.textFileContent}
                         </pre>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="absolute top-4 right-4 text-slate-500 hover:text-white hover:bg-white/5"
                           onClick={() => {
-                            navigator.clipboard.writeText(submission.textFileContent || "")
+                            navigator.clipboard.writeText(submission?.textFileContent || "")
                             toast({ title: "Disalin", description: "Kandungan fail disalin ke clipboard." })
                           }}
                         >
