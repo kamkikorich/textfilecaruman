@@ -138,7 +138,7 @@ export default async function BillingPage() {
                 ].map((opt, i) => (
                   <a
                     key={i}
-                    href={`https://wa.me/60123757460?text=${encodeURIComponent(`Salam, saya ingin aktifkan TextFileSKBBK Pro.\n\nNama: ${user.name || ''}\nEmail: ${user.email}\nTempoh: ${opt.label}\nJumlah: RM${opt.price}.00\n\nSila berikan maklumat akaun. Terima kasih.`)}`}
+                    href={`https://wa.me/PLACEHOLDER_WHATSAPP?text=${encodeURIComponent(`Salam, saya ingin aktifkan TextFileSKBBK Pro.\n\nNama: ${user.name || ''}\nEmail: ${user.email}\nTempoh: ${opt.label}\nJumlah: RM${opt.price}.00\n\nSila berikan maklumat akaun. Terima kasih.`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group relative flex flex-col items-center justify-center p-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-blue-600/20 hover:border-blue-500/50 transition-all duration-300 overflow-hidden"
@@ -187,7 +187,7 @@ export default async function BillingPage() {
                 </div>
 
                 <a
-                  href={`https://wa.me/60123757460?text=${encodeURIComponent(`Salam, saya ingin aktifkan TextFileSKBBK Pro.\n\nNama: ${user.name || ''}\nEmail: ${user.email}\n\nSila berikan maklumat akaun. Terima kasih.`)}`}
+                  href={`https://wa.me/PLACEHOLDER_WHATSAPP?text=${encodeURIComponent(`Salam, saya ingin aktifkan TextFileSKBBK Pro.\n\nNama: ${user.name || ''}\nEmail: ${user.email}\n\nSila berikan maklumat akaun. Terima kasih.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block"

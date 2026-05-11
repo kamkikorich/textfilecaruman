@@ -77,7 +77,7 @@ NEXT_PUBLIC_APP_URL=https://caruman.waju.my
 # Email (Dynamail)
 SMTP_HOST=mail9.dynamail.asia
 SMTP_PORT=587
-SMTP_USER=walter@caruman.waju.my
+SMTP_USER=YOUR_EMAIL@example.com
 SMTP_PASSWORD=YOUR_ACTUAL_SMTP_PASSWORD
 SMTP_SECURE=false
 

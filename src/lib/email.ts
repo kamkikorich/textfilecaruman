@@ -130,8 +130,8 @@ export async function sendVerificationEmail(data: {
               <strong>TextFile SKBBK SaaS</strong><br>
               Sistem Pengurusan Caruman Digital Malaysia<br><br>
               Ada soalan? Hubungi kami di 
-              <a href="mailto:walter@waju.my">walter@waju.my</a> atau 
-              <a href="https://wa.me/60123757460">WhatsApp</a>
+              <a href="mailto:${process.env.SMTP_USER || 'admin@example.com'}">${process.env.SMTP_USER || 'admin@example.com'}</a> atau 
+              <a href="https://wa.me/${process.env.WHATSAPP_NUMBER || '60123456789'}">WhatsApp</a>
             </p>
             <p style="margin-top: 16px; font-size: 12px;">
               Ini adalah email automatik. Sila jangan balas email ini.
@@ -271,8 +271,8 @@ export async function sendWelcomeEmail(data: {
               Perlukan bantuan? Kami sedia membantu:
             </p>
             <ul style="color: #64748b; font-size: 15px; line-height: 1.8; padding-left: 20px;">
-              <li>📧 Emel: walter@waju.my</li>
-              <li>📱 WhatsApp: +60 12-375 7460</li>
+              <li>📧 Emel: ${process.env.SMTP_USER || 'admin@example.com'}</li>
+              <li>📱 WhatsApp: +60 XX-XXX XXXX</li>
               <li>💬 Live chat dalam dashboard</li>
             </ul>
           </div>
@@ -298,8 +298,8 @@ Mula sekarang: ${dashboardUrl}
 Anda mendapat percubaan percuma 30 hari. Selepas itu, langganan adalah RM20/bulan.
 
 Perlukan bantuan?
-- Emel: walter@waju.my
-- WhatsApp: +60 12-375 7460
+- Emel: ${process.env.SMTP_USER || 'admin@example.com'}
+- WhatsApp: +60 XX-XXX XXXX
 
 ---
 TextFile SKBBK SaaS
@@ -326,7 +326,7 @@ export async function sendAdminNotification(userData: {
   companyName?: string
   isVerified?: boolean
 }) {
-  const adminEmail = "walter@waju.my"
+  const adminEmail = "${process.env.SMTP_USER || 'admin@example.com'}"
   const verificationStatus = userData.isVerified ? "✅ Disahkan" : "⏳ Belum Disahkan"
 
   const mailOptions = {
@@ -485,8 +485,8 @@ export async function sendPasswordResetEmail(data: {
               <strong>TextFile SKBBK SaaS</strong><br>
               Sistem Pengurusan Caruman Digital Malaysia<br><br>
               Ada soalan? Hubungi kami di
-              <a href="mailto:walter@waju.my">walter@waju.my</a> atau
-              <a href="https://wa.me/60123757460">WhatsApp</a>
+              <a href="mailto:${process.env.SMTP_USER || 'admin@example.com'}">${process.env.SMTP_USER || 'admin@example.com'}</a> atau
+              <a href="https://wa.me/${process.env.WHATSAPP_NUMBER || '60123456789'}">WhatsApp</a>
             </p>
             <p style="margin-top: 16px; font-size: 12px;">
               Ini adalah email automatik. Sila jangan balas email ini.

@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       letterId: letter.id,
-      whatsappUrl: `https://wa.me/60123757460?text=${waMessage}`,
+      whatsappUrl: `https://wa.me/PLACEHOLDER_WHATSAPP?text=${waMessage}`,
     })
   } catch (error) {
     console.error("Error creating appeal letter:", error)

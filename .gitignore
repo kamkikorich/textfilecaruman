@@ -60,6 +60,9 @@ Thumbs.db
 *.bak
 *.tmp
 
+# Scratch scripts (may contain test credentials)
+scratch/
+
 # Deployment files with sensitive data
 DEPLOYMENT.md
 CRITICAL_DEPLOYMENT_CHECKLIST.md
