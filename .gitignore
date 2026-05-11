@@ -67,6 +67,7 @@ QUICK_DEPLOY_CARD.txt
 .claude/
 .qwen/
 docker-compose.zip
+docker-compose.vps.yml
 DEPLOY_TO_VPS.ps1
 DEPLOY_TO_VPS.sh
 PERKESO_*.txt
