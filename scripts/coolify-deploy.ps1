@@ -70,8 +70,9 @@ function Test-SensitiveData {
     )
 
     $found = $false
+    $scriptName = Split-Path -Leaf $PSCommandPath
     foreach ($pattern in $patterns) {
-        $matches = git ls-files | xargs grep -l $pattern 2>$null
+        $matches = git ls-files | Where-Object { $_ -ne $scriptName } | xargs grep -l $pattern 2>$null
         if ($matches) {
             Write-Status "Found sensitive pattern '$pattern' in: $matches" "Error"
             $found = $true
