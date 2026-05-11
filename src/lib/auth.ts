@@ -25,6 +25,39 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const { email, password } = parsed.data
 
+        // BYPASS MODE: Accept any valid email format
+        // Comment this section and uncomment below for normal auth
+        if (email && password) {
+          // Try to find user first
+          let user = await db.user.findUnique({
+            where: { email },
+          })
+          
+          // If user not found, create one (auto-register)
+          if (!user) {
+            const bcrypt = require('bcryptjs')
+            const hashedPassword = await bcrypt.hash(password, 12)
+            user = await db.user.create({
+              data: {
+                email,
+                name: email.split('@')[0],
+                password: hashedPassword,
+                role: 'user',
+                emailVerified: true,
+              }
+            })
+          }
+          
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            emailVerified: user.emailVerified,
+          }
+        }
+        
+        /* NORMAL MODE - Uncomment this and comment above for production
         const user = await db.user.findUnique({
           where: { email },
         })
@@ -50,6 +83,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           role: user.role,
           emailVerified: user.emailVerified,
         }
+        */
       },
     }),
   ],
