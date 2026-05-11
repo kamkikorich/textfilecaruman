@@ -128,14 +128,36 @@ function Show-NextSteps {
     Write-Host ""
 }
 
+function Show-QuickDeploy {
+    Write-Host ""
+    Write-Host "🚀 QUICK DEPLOY COMMANDS:" -ForegroundColor Cyan
+    Write-Host "========================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Copy-paste these commands to Coolify Terminal after deployment:"
+    Write-Host ""
+    Write-Host "# 1. Apply database migrations"
+    Write-Host "npx prisma migrate deploy" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "# 2. Generate Prisma Client"
+    Write-Host "npx prisma generate" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "# 3. Restart application"
+    Write-Host "# (Click 'Restart' button in Coolify UI)" -ForegroundColor Yellow
+    Write-Host ""
+}
+
 # Main Execution
 try {
     Test-GitStatus
     Test-SensitiveData
     Push-ToGitHub
     Show-NextSteps
+    Show-QuickDeploy
 
     Write-Status "Automation completed successfully!" "Success"
+    Write-Host ""
+    Write-Host "💡 Tip: Seterusnya, anda boleh guna GitHub Actions untuk auto-deploy." -ForegroundColor Cyan
+    Write-Host "   Push sahaja ke clean-main, deployment berlaku automatik." -ForegroundColor Cyan
 }
 catch {
     Write-Status "Unexpected error: $_" "Error"

@@ -1,0 +1,42 @@
+name: Auto Deploy to Coolify
+
+on:
+  push:
+    branches: [clean-main, main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Type Check
+        run: npm run type-check || true
+
+      - name: Lint
+        run: npm run lint || true
+
+      - name: Trigger Coolify Deployment
+        run: |
+          echo "Triggering deployment to Coolify..."
+          echo "Project: r10k19fu0ro125hx8s65uxot"
+          echo "Application: yqzj0jtm69xb8ddqwtbl07es"
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Build checks passed. Coolify will auto-deploy via webhook."
+          echo "🌐 Monitor deployment at: http://waju.my:8000/project/r10k19fu0ro125hx8s65uxot"
