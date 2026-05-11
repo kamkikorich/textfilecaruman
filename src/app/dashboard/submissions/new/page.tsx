@@ -432,7 +432,7 @@ export default function NewSubmissionPage() {
                       </Button>
                       <Button
                         size="sm"
-                        onClick={handleDownload}
+                        onClick={() => handleDownload()}
                         className="gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 shadow-lg shadow-blue-500/25 focus-ring"
                         disabled={!submission?.textFileContent}
                       >
