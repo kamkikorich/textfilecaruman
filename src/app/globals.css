@@ -41,10 +41,10 @@
     --surface-2: 222.2 84% 10%;
     --surface-3: 222.2 84% 13%;
 
-    --glow-blue: rgba(59, 130, 246, 0.15);
-    --glow-indigo: rgba(99, 102, 241, 0.15);
-    --glow-emerald: rgba(16, 185, 129, 0.15);
-    --glow-amber: rgba(245, 158, 11, 0.15);
+    --glow-blue: rgba(59, 130, 246, 0.25);
+    --glow-indigo: rgba(99, 102, 241, 0.25);
+    --glow-emerald: rgba(16, 185, 129, 0.25);
+    --glow-amber: rgba(245, 158, 11, 0.25);
   }
 }
 
@@ -63,8 +63,8 @@
 /* ===== Premium Utilities ===== */
 
 .gradient-text {
-  @apply bg-clip-text text-transparent font-bold;
-  background-image: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+  @apply bg-clip-text text-transparent font-extrabold;
+  background-image: linear-gradient(135deg, #60a5fa 0%, #818cf8 50%, #a78bfa 100%);
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -81,11 +81,11 @@
 }
 
 .glass {
-  @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+  @apply bg-white/[0.03] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)];
 }
 
 .glass-subtle {
-  @apply bg-white/[0.03] backdrop-blur-lg border border-white/[0.06];
+  @apply bg-white/[0.01] backdrop-blur-xl border border-white/[0.05];
 }
 
 .card-hover {
@@ -195,9 +195,9 @@
 
 /* Advanced Premium Effects */
 .mesh-gradient-pro {
-  background: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-              radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-              radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+  background: radial-gradient(at 0% 0%, hsla(220,100%,15%,1) 0, transparent 50%), 
+              radial-gradient(at 50% 0%, hsla(240,80%,10%,1) 0, transparent 50%), 
+              radial-gradient(at 100% 0%, hsla(280,60%,15%,1) 0, transparent 50%);
   background-color: #020617;
 }
 

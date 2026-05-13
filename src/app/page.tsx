@@ -25,10 +25,10 @@ export default function Home() {
         {/* Hero Section */}
         <section className="relative overflow-hidden pt-24 pb-32 lg:pt-36 lg:pb-48">
           {/* Background effects */}
+          <div className="absolute inset-0 -z-10 mesh-gradient-pro opacity-40" />
           <div className="absolute inset-0 -z-10">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[120px]" />
-            <div className="absolute top-40 right-0 w-[400px] h-[400px] bg-indigo-500/8 rounded-full blur-[80px]" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-[400px] bg-blue-600/5 rounded-full blur-[100px]" />
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
+            <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px]" />
           </div>
           {/* Grid overlay */}
           <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
@@ -121,7 +121,7 @@ export default function Home() {
               </div>
 
               {/* Feature card 3 */}
-              <div className="group relative rounded-2xl bg-slate-900/80 border border-white/[0.08] p-6 card-hover overflow-hidden">
+              <div className="group relative rounded-2xl glass border border-white/[0.08] p-6 card-hover overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-[60px]" />
                 <div className="relative z-10">
                   <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center mb-4 glow-amber">
