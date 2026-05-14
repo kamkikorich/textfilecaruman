@@ -138,6 +138,11 @@ export default async function DashboardPage() {
                 <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Caruman</span>
               </Button>
             </Link>
+            <Link href="/dashboard/payroll">
+              <Button size="sm" className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 shadow-lg shadow-emerald-500/25 focus-ring">
+                <DollarSign className="w-4 h-4" /> <span className="hidden sm:inline">Gaji</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </header>

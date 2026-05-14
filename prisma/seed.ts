@@ -257,6 +257,30 @@ async function main() {
     },
   })
 
+  // ============================================
+  // 8. Default Payroll Statutory Config (KWSP/PERKESO/EIS/PCB rates)
+  // ============================================
+  await prisma.payrollStatutoryConfig.upsert({
+    where: { name: "default" },
+    update: {},
+    create: {
+      name: "default",
+      isActive: true,
+      epfEmployeeRate: 0.11,
+      epfEmployerRate: 0.12,
+      epfEmployerRate2: 0.13,
+      epfWageCeiling: 5000.00,
+      socsoEmployeeRate: 0.005,
+      socsoEmployerRate: 0.0175,
+      socsoWageCeiling: 5000.00,
+      eisEmployeeRate: 0.002,
+      eisEmployerRate: 0.002,
+      eisWageCeiling: 5000.00,
+      pcbEpfReliefCap: 4000.00,
+    },
+  })
+  console.log('✅ Default statutory config created')
+
   console.log('\n🎉 Database seed completed!')
   console.log('\n📝 Login Credentials:')
   console.log('   Admin: admin@waju.my / admin123')

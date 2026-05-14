@@ -385,7 +385,7 @@ model PayrollEmployee {
 
 model OvertimeEntry {
   id          String   @id @default(uuid())
-  periodId    String
+  periodId    String?
   employeeId  String
   date        DateTime
   hours       Decimal  @db.Decimal(6, 2)
@@ -394,7 +394,7 @@ model OvertimeEntry {
   description String?
   createdAt   DateTime @default(now())
 
-  period   PayrollPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  period   PayrollPeriod? @relation(fields: [periodId], references: [id], onDelete: SetNull)
   employee Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@index([periodId])
