@@ -157,7 +157,8 @@ export default async function DashboardPage() {
                 <h3 className="font-bold text-emerald-400 text-sm">Peringatan: Takrif Gaji Kasar</h3>
                 <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                   Sila pastikan gaji yang dimasukkan adalah <span className="text-white font-bold underline">Gaji Kasar</span>. 
-                  Ini merangkumi gaji pokok, elaun tetap, komisen, dan bayaran insentif (kecuali bonus tahunan & caruman KWSP majikan). 
+                  Ini merangkumi gaji pokok, elaun tetap, komisen, bayaran insentif, dan bonus tahunan. 
+                  <span className="block mt-1">Tidak termasuk: tuntutan perjalanan, bayaran balik (rembursment), dan elaun tidak tetap.</span>
                   Kegagalan memasukkan gaji kasar yang tepat akan menjejaskan jumlah caruman PERKESO & EIS.
                 </p>
               </div>

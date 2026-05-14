@@ -319,8 +319,8 @@ export default function EmployeesPage() {
                 <h3 className="font-bold text-emerald-400 text-sm">Info: Takrif Gaji Kasar (PERKESO)</h3>
                 <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                   Sila masukkan <span className="text-white font-bold underline">Gaji Kasar Sebulan</span>. 
-                  Ini merangkumi gaji pokok, elaun tetap (cth: elaun makan, elaun pengangkutan), komisen, dan bayaran insentif. 
-                  <span className="block mt-1 italic text-slate-500">*Jangan masukkan bonus tahunan atau caruman KWSP majikan.</span>
+                  Ini merangkumi gaji pokok, elaun tetap (cth: elaun makan, elaun pengangkutan), komisen, bayaran insentif, dan bonus tahunan. 
+                  <span className="block mt-1 italic text-slate-500">*Tidak termasuk: tuntutan perjalanan, bayaran balik (rembursment), dan elaun tidak tetap.</span>
                 </p>
               </div>
             </div>
