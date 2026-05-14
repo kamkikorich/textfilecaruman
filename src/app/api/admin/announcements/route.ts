@@ -13,6 +13,8 @@ const createSchema = z.object({
   expiresAt: z.string().optional().nullable(),
 })
 
+export const dynamic = "force-dynamic"
+
 // GET — List all announcements (admin view)
 export async function GET() {
   try {
