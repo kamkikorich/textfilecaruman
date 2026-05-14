@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+# Install dependencies for sharp (image optimization)
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install dependencies
+RUN npm ci
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Expose port
+EXPOSE 3000
+
+# Development command (will be overridden by docker-compose)
+CMD ["npm", "run", "dev"]

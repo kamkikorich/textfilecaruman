@@ -1,0 +1,64 @@
+import { NextRequest, NextResponse } from "next/server"
+import { db } from "@/lib/db"
+import bcrypt from "bcryptjs"
+
+export async function POST(request: NextRequest) {
+  try {
+    const { token, password } = await request.json()
+
+    if (!token || !password) {
+      return NextResponse.json(
+        { error: "Token dan password diperlukan" },
+        { status: 400 }
+      )
+    }
+
+    if (password.length < 6) {
+      return NextResponse.json(
+        { error: "Password mesti sekurang-kurangnya 6 karakter" },
+        { status: 400 }
+      )
+    }
+
+    // Find user with valid reset token
+    const user = await db.user.findFirst({
+      where: {
+        resetToken: token,
+        resetExpires: {
+          gte: new Date(),
+        },
+      },
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Token tidak sah atau telah tamat tempoh" },
+        { status: 400 }
+      )
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(password, 12)
+
+    // Update user password and clear reset token
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetExpires: null,
+      },
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: "Password berjaya dikemaskini. Sila log masuk dengan password baru.",
+    })
+  } catch (error) {
+    console.error("Reset password error:", error)
+    return NextResponse.json(
+      { error: "Ralat berlaku. Sila cuba lagi." },
+      { status: 500 }
+    )
+  }
+}
