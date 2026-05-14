@@ -137,16 +137,16 @@ function calcSocsoFromTable(
 
   if (isForeigner) {
     const skbbkRate = getSkbbkRate(month, year)
-    const socsoEmployer = r(lookup.JP_Majikan)
+    const socsoEmployer = r(lookup.jp_se)
     const skbbkPortion = r(socsoEmployer * skbbkRate)
     return { employee: 0, employer: r(socsoEmployer + skbbkPortion) }
   }
 
   if (isJenisKedua) {
-    return { employee: 0, employer: r(lookup.JK_Majikan) }
+    return { employee: 0, employer: r(lookup.jk_se) }
   }
 
-  return { employee: r(lookup.JP_Pekerja), employer: r(lookup.JP_Majikan) }
+  return { employee: r(lookup.jp_ss), employer: r(lookup.jp_se) }
 }
 
 function calcEisFromTable(
@@ -160,7 +160,7 @@ function calcEisFromTable(
   if (eisNoContribution57) return { employee: 0, employer: 0 }
 
   const lookup: ContributionLookup = lookupContribution(salary)
-  return { employee: r(lookup.ES), employer: r(lookup.EE) }
+  return { employee: r(lookup.es), employer: r(lookup.ee) }
 }
 
 function calcPcb(
