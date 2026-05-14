@@ -260,7 +260,7 @@ export async function sendWelcomeEmail(data: {
               </p>
               <p>
                 Anda telah diberikan percubaan percuma selama 30 hari. 
-                Selepas tempoh percubaan, langganan adalah <strong>RM20/bulan</strong>.
+                 Selepas tempoh percubaan, langganan adalah <strong>RM10/bulan</strong>.
               </p>
               <p style="margin-bottom: 0;">
                 <a href="${billingUrl}" style="color: #1d4ed8; font-weight: 600;">Lihat butiran langganan →</a>
@@ -295,7 +295,7 @@ Email anda telah berjaya disahkan. Akaun TextFile SKBBK anda kini aktif!
 
 Mula sekarang: ${dashboardUrl}
 
-Anda mendapat percubaan percuma 30 hari. Selepas itu, langganan adalah RM20/bulan.
+Anda mendapat percubaan percuma 30 hari. Selepas itu, langganan adalah RM10/bulan.
 
 Perlukan bantuan?
 - Emel: ${process.env.SMTP_USER || 'admin@example.com'}

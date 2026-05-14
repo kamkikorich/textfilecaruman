@@ -191,7 +191,7 @@ export default function Home() {
                   <p className="text-slate-400">Sesuai untuk syarikat dengan 1-100 pekerja.</p>
                 </div>
                 <div className="relative z-10 flex items-baseline gap-1 mb-8">
-                  <span className="text-5xl font-extrabold text-white">RM20</span>
+                  <span className="text-5xl font-extrabold text-white">RM10</span>
                   <span className="text-xl text-slate-400">/bulan</span>
                 </div>
                 <div className="relative z-10 space-y-4 mb-10 text-left">

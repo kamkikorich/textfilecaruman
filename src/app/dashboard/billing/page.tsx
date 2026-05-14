@@ -122,7 +122,7 @@ export default async function BillingPage() {
               
               <div className="mb-8 relative z-10">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-6xl font-black text-white neon-text-blue tracking-tighter">RM20</span>
+                   <span className="text-6xl font-black text-white neon-text-blue tracking-tighter">RM10</span>
                   <span className="text-blue-300/50 font-bold">/bulan</span>
                 </div>
                 <p className="text-[10px] text-blue-400 font-black mt-2 tracking-[0.2em] uppercase">Pilih Tempoh Langganan Anda</p>
@@ -131,10 +131,10 @@ export default async function BillingPage() {
               {/* 4 Duration Options - Re-introduced */}
               <div className="grid grid-cols-2 gap-3 mb-8 relative z-10">
                 {[
-                  { months: 1, price: 20, disc: null, label: "1 Bulan" },
-                  { months: 3, price: 54, disc: "-10%", label: "3 Bulan" },
-                  { months: 6, price: 96, disc: "-20%", label: "6 Bulan" },
-                  { months: 12, price: 168, disc: "-30%", label: "12 Bulan" },
+                   { months: 1, price: 10, disc: null, label: "1 Bulan" },
+                   { months: 3, price: 27, disc: "-10%", label: "3 Bulan" },
+                   { months: 6, price: 48, disc: "-20%", label: "6 Bulan" },
+                   { months: 12, price: 84, disc: "-30%", label: "12 Bulan" },
                 ].map((opt, i) => (
                   <a
                     key={i}
@@ -181,7 +181,7 @@ export default async function BillingPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-1">Scan & Bayar via DuitNow</p>
-                    <p className="text-xl font-black text-white">RM20.00 / Bulan</p>
+                     <p className="text-xl font-black text-white">RM10.00 / Bulan</p>
                     <p className="text-xs text-slate-400 mt-2 font-medium">Justinah Binti Buki (AmBank)</p>
                   </div>
                 </div>

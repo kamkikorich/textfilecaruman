@@ -42,6 +42,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
 COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./next.config.js
 
 RUN npm install -g prisma@6 ts-node typescript @types/node
+RUN mkdir -p /app/node_modules/.bin && ln -sf /usr/local/bin/prisma /app/node_modules/.bin/prisma && ln -sf /usr/local/bin/ts-node /app/node_modules/.bin/ts-node && ln -sf /usr/local/bin/tsc /app/node_modules/.bin/tsc
+RUN chown -R nextjs:nodejs /app/node_modules/.bin
 
 USER nextjs
 

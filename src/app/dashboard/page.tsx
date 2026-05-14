@@ -476,7 +476,7 @@ export default async function DashboardPage() {
                         ? "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white" 
                         : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5"
                     }`}>
-                      {isActive ? "Urus Langganan" : "Upgrade ke Pro — RM20"}
+                       {isActive ? "Urus Langganan" : "Upgrade ke Pro — RM10"}
                     </Button>
                   </Link>
                 </div>
