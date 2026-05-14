@@ -86,10 +86,11 @@ model Employer {
   updatedAt               DateTime  @updatedAt
   deletedAt               DateTime?
 
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  employees       Employee[]
-  submissions     Submission[]
-  payrollPeriods  PayrollPeriod[]
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employees         Employee[]
+  submissions       Submission[]
+  payrollPeriods    PayrollPeriod[]
+  payItemTemplates  PayItemTemplate[]
 
   @@unique([userId, employerCode])
   @@index([userId])
