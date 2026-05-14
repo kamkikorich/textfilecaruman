@@ -167,6 +167,9 @@ model Employee {
   contributions   Contribution[]
   payrollEntries  PayrollEmployee[]
   overtimeEntries OvertimeEntry[]
+  salaryConfig    EmployeeSalaryConfig?
+  loans           EmployeeLoan[]
+  attendancePenalties AttendancePenalty[]
 
   @@unique([employerId, icNumber])
   @@index([employerId])
@@ -322,8 +325,102 @@ model Payment {
 }
 
 // ============================================
-// PAYROLL — Pengurusan Gaji Automatik
+// PAYROLL — Pengurusan Gaji Automatik (Professional)
 // ============================================
+
+model EmployeeSalaryConfig {
+  id                String   @id @default(uuid())
+  employeeId        String   @unique
+  epfEmployeeRate   Decimal? @db.Decimal(6, 4)
+  epfEmployerRate   Decimal? @db.Decimal(6, 4)
+  socsoCategory     String?  // null=use employee.category
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  @@map("employee_salary_configs")
+}
+
+model EmployeeLoan {
+  id               String   @id @default(uuid())
+  employeeId       String
+  totalAmount      Decimal  @db.Decimal(10, 2)
+  monthlyDeduction Decimal  @db.Decimal(10, 2)
+  balance          Decimal  @db.Decimal(10, 2)
+  startDate        DateTime @default(now())
+  status           String   @default("ACTIVE")
+  description      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  employee        Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  loanDeductions  LoanDeduction[]
+
+  @@index([employeeId, status])
+  @@map("employee_loans")
+}
+
+model LoanDeduction {
+  id          String   @id @default(uuid())
+  loanId      String
+  periodId    String
+  amount      Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+
+  loan   EmployeeLoan  @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  period PayrollPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+
+  @@unique([loanId, periodId])
+  @@map("loan_deductions")
+}
+
+model PayItemTemplate {
+  id         String   @id @default(uuid())
+  employerId String
+  name       String
+  type       String   // ALLOWANCE | DEDUCTION
+  epfTaxable Boolean  @default(true)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  employer  Employer         @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  payItems  PayslipPayItem[]
+
+  @@unique([employerId, name])
+  @@map("pay_item_templates")
+}
+
+model PayslipPayItem {
+  id         String   @id @default(uuid())
+  payslipId  String
+  templateId String?
+  name       String
+  type       String   // ALLOWANCE | DEDUCTION
+  amount     Decimal  @db.Decimal(10, 2)
+  epfTaxable Boolean  @default(true)
+
+  payslip  PayrollEmployee  @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+  template PayItemTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@map("payslip_pay_items")
+}
+
+model AttendancePenalty {
+  id              String   @id @default(uuid())
+  periodId        String
+  employeeId      String
+  absentDays      Decimal  @default(0) @db.Decimal(4, 1)
+  lateHours       Decimal  @default(0) @db.Decimal(4, 1)
+  deductionAmount Decimal  @default(0) @db.Decimal(10, 2)
+  note            String?
+  createdAt       DateTime @default(now())
+
+  period   PayrollPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  employee Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([periodId, employeeId])
+  @@map("attendance_penalties")
+}
 
 model PayrollPeriod {
   id             String   @id @default(uuid())
@@ -338,9 +435,11 @@ model PayrollPeriod {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  employer        Employer           @relation(fields: [employerId], references: [id], onDelete: Cascade)
-  payrollEmployees PayrollEmployee[]
-  overtimeEntries  OvertimeEntry[]
+  employer            Employer             @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  payrollEmployees    PayrollEmployee[]
+  overtimeEntries     OvertimeEntry[]
+  attendancePenalties AttendancePenalty[]
+  loanDeductions      LoanDeduction[]
 
   @@unique([employerId, month, year])
   @@index([employerId])
@@ -357,12 +456,15 @@ model PayrollEmployee {
   overtimeHours    Decimal  @default(0) @db.Decimal(6, 2)
   overtimePay      Decimal  @default(0) @db.Decimal(10, 2)
   commissionAmount Decimal  @default(0) @db.Decimal(10, 2)
+  bonusAmount      Decimal  @default(0) @db.Decimal(10, 2)
   grossSalary      Decimal  @db.Decimal(10, 2)
 
   epfEmployee      Decimal  @default(0) @db.Decimal(10, 2)
   socsoEmployee    Decimal  @default(0) @db.Decimal(10, 2)
   eisEmployee      Decimal  @default(0) @db.Decimal(10, 2)
   pcbAmount        Decimal  @default(0) @db.Decimal(10, 2)
+  loanDeduction    Decimal  @default(0) @db.Decimal(10, 2)
+  attendanceDeduction Decimal @default(0) @db.Decimal(10, 2)
   otherDeductions  Decimal  @default(0) @db.Decimal(10, 2)
 
   epfEmployer      Decimal  @default(0) @db.Decimal(10, 2)
@@ -372,11 +474,15 @@ model PayrollEmployee {
   totalDeductions  Decimal  @db.Decimal(10, 2)
   netSalary        Decimal  @db.Decimal(10, 2)
 
-  note             String?
-  createdAt        DateTime @default(now())
+  note              String?
+  epfEmployerRateUsed  Decimal? @db.Decimal(6, 4)
+  epfEmployeeRateUsed  Decimal? @db.Decimal(6, 4)
+  workingDays       Int      @default(26)
+  createdAt         DateTime @default(now())
 
-  period   PayrollPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  employee Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  period        PayrollPeriod    @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  employee      Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  payItems      PayslipPayItem[]
 
   @@unique([periodId, employeeId])
   @@index([employeeId])

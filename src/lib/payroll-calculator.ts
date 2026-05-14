@@ -1,14 +1,11 @@
-const MONTHS_PER_YEAR = 12
+import { lookupContribution, getSkbbkRate, type ContributionLookup } from "./perkeso"
 
+const MONTHS_PER_YEAR = 12
 const PERSONAL_RELIEF = 9000
 const CHILD_RELIEF = 2000
-const EPF_RELIEF_CAP = 4000
 
 interface TaxBracket {
-  from: number
-  to: number
-  rate: number
-  cumulative: number
+  from: number; to: number; rate: number; cumulative: number
 }
 
 const TAX_BRACKETS: TaxBracket[] = [
@@ -24,38 +21,60 @@ const TAX_BRACKETS: TaxBracket[] = [
   { from: 2000001, to: Infinity, rate: 0.3, cumulative: 525000 },
 ]
 
-export interface StatutoryConfig {
-  epfEmployeeRate: number
-  epfEmployerRate: number
-  epfEmployerRate2: number
-  epfWageCeiling: number
-  socsoEmployeeRate: number
-  socsoEmployerRate: number
-  socsoWageCeiling: number
-  eisEmployeeRate: number
-  eisEmployerRate: number
-  eisWageCeiling: number
-  pcbEpfReliefCap: number
+function r(v: number): number { return Math.round(v * 100) / 100 }
+
+export interface SalaryConfig {
+  epfEmployeeRate?: number | null
+  epfEmployerRate?: number | null
+}
+
+export interface PayItem {
+  name: string
+  type: "ALLOWANCE" | "DEDUCTION"
+  amount: number
+  epfTaxable: boolean
 }
 
 export interface PayrollInput {
   basicSalary: number
   allowanceAmount: number
   overtimePay: number
+  overtimeHours: number
   commissionAmount: number
-  epfEmployeeRate: number
+  bonusAmount: number
+  customItems: PayItem[]
   enteredAfter55: boolean
   eisNoContribution57: boolean
+  workerType: string
+  age: number
+  category: string
+  month: number
+  year: number
   pcbMaritalStatus: string
   pcbChildrenCount: number
-  config: StatutoryConfig
+  salaryConfig: SalaryConfig | null
+  statutoryConfig: StatutoryConfig
+  loanDeductionTotal: number
+  attendanceDeduction: number
+  workingDays: number
+}
+
+export interface StatutoryConfig {
+  epfEmployeeRate: number
+  epfEmployerRate: number
+  epfEmployerRate2: number
+  pcbEpfReliefCap: number
 }
 
 export interface PayrollOutput {
   basicSalary: number
   allowanceAmount: number
+  overtimeHours: number
   overtimePay: number
   commissionAmount: number
+  bonusAmount: number
+  customAllowances: { name: string; amount: number; epfTaxable: boolean }[]
+  customDeductions: { name: string; amount: number; epfTaxable: boolean }[]
   grossSalary: number
   epfEmployee: number
   epfEmployer: number
@@ -64,59 +83,84 @@ export interface PayrollOutput {
   eisEmployee: number
   eisEmployer: number
   pcbAmount: number
+  loanDeduction: number
+  attendanceDeduction: number
   totalDeductions: number
   netSalary: number
+  epfEmployeeRateUsed: number
+  epfEmployerRateUsed: number
 }
 
-function round(value: number): number {
-  return Math.round(value * 100) / 100
+export function getDefaultConfig(): StatutoryConfig {
+  return {
+    epfEmployeeRate: 0.11,
+    epfEmployerRate: 0.12,
+    epfEmployerRate2: 0.13,
+    pcbEpfReliefCap: 4000,
+  }
 }
 
 function calcEpf(
-  grossSalary: number,
-  employeeRate: number,
+  epfGross: number,
+  salaryConfig: SalaryConfig | null,
   config: StatutoryConfig,
   enteredAfter55: boolean
-): { employee: number; employer: number } {
+): { employee: number; employer: number; empRate: number; emplRate: number } {
   if (enteredAfter55) {
-    return {
-      employee: 0,
-      employer: round(grossSalary * 0.04),
-    }
+    return { employee: 0, employer: r(epfGross * 0.04), empRate: 0, emplRate: 0.04 }
   }
+  const empRate = salaryConfig?.epfEmployeeRate ?? config.epfEmployeeRate
+  const employee = r(epfGross * empRate)
 
-  const effectiveRate = employeeRate > 0 ? employeeRate : config.epfEmployeeRate
-  const employee = round(grossSalary * effectiveRate)
-
-  const isHighSalary = grossSalary > config.epfWageCeiling
-  const employerRate = isHighSalary ? config.epfEmployerRate2 : config.epfEmployerRate
-  const employer = round(grossSalary * employerRate)
-
-  return { employee, employer }
+  let emplRate: number
+  if (salaryConfig?.epfEmployerRate != null) {
+    emplRate = salaryConfig.epfEmployerRate
+  } else {
+    emplRate = epfGross > 5000 ? config.epfEmployerRate2 : config.epfEmployerRate
+  }
+  const employer = r(epfGross * emplRate)
+  return { employee, employer, empRate, emplRate }
 }
 
-function calcSocso(
-  grossSalary: number,
-  config: StatutoryConfig
+function calcSocsoFromTable(
+  salary: number,
+  age: number,
+  category: string,
+  enteredAfter55: boolean,
+  workerType: string,
+  month: number,
+  year: number
 ): { employee: number; employer: number } {
-  const cappedSalary = Math.min(grossSalary, config.socsoWageCeiling)
-  const employee = round(cappedSalary * config.socsoEmployeeRate)
-  const employer = round(cappedSalary * config.socsoEmployerRate)
-  return { employee, employer }
+  const lookup: ContributionLookup = lookupContribution(salary)
+  const isForeigner = workerType === "FOREIGN"
+  const isJenisKedua = age >= 60 || category === "JENIS2" || enteredAfter55
+
+  if (isForeigner) {
+    const skbbkRate = getSkbbkRate(month, year)
+    const socsoEmployer = r(lookup.JP_Majikan)
+    const skbbkPortion = r(socsoEmployer * skbbkRate)
+    return { employee: 0, employer: r(socsoEmployer + skbbkPortion) }
+  }
+
+  if (isJenisKedua) {
+    return { employee: 0, employer: r(lookup.JK_Majikan) }
+  }
+
+  return { employee: r(lookup.JP_Pekerja), employer: r(lookup.JP_Majikan) }
 }
 
-function calcEis(
-  grossSalary: number,
-  config: StatutoryConfig,
-  eisNoContribution57: boolean
+function calcEisFromTable(
+  salary: number,
+  age: number,
+  eisNoContribution57: boolean,
+  workerType: string
 ): { employee: number; employer: number } {
-  if (eisNoContribution57) {
-    return { employee: 0, employer: 0 }
-  }
-  const cappedSalary = Math.min(grossSalary, config.eisWageCeiling)
-  const employee = round(cappedSalary * config.eisEmployeeRate)
-  const employer = round(cappedSalary * config.eisEmployerRate)
-  return { employee, employer }
+  if (workerType === "FOREIGN") return { employee: 0, employer: 0 }
+  if (age < 18 || age > 59) return { employee: 0, employer: 0 }
+  if (eisNoContribution57) return { employee: 0, employer: 0 }
+
+  const lookup: ContributionLookup = lookupContribution(salary)
+  return { employee: r(lookup.ES), employer: r(lookup.EE) }
 }
 
 function calcPcb(
@@ -128,61 +172,81 @@ function calcPcb(
 ): number {
   const monthlyNet = grossSalary - Math.min(epfEmployee, 333.33)
   const annualNet = monthlyNet * MONTHS_PER_YEAR
-
   const annualEpfRelief = Math.min(epfEmployee * MONTHS_PER_YEAR, config.pcbEpfReliefCap)
-
   const childrenRelief = Math.min(pcbChildrenCount, 4) * CHILD_RELIEF
 
   let categoryRelief = 0
-  if (pcbMaritalStatus === "MARRIED" || pcbMaritalStatus === "MARRIED_SEPARATE") {
+  if (pcbMaritalStatus === "MARRIED") {
     categoryRelief = 0
   }
 
-  const chargeableIncome = Math.max(
-    0,
-    annualNet - PERSONAL_RELIEF - annualEpfRelief - childrenRelief - categoryRelief
-  )
+  const chargeable = Math.max(0, annualNet - PERSONAL_RELIEF - annualEpfRelief - childrenRelief - categoryRelief)
 
-  for (const bracket of TAX_BRACKETS) {
-    if (chargeableIncome <= bracket.to) {
-      const taxForBracket = round((chargeableIncome - bracket.from) * bracket.rate)
-      const annualTax = round(bracket.cumulative + taxForBracket)
-      return round(annualTax / MONTHS_PER_YEAR)
+  for (const b of TAX_BRACKETS) {
+    if (chargeable <= b.to) {
+      return r((b.cumulative + r((chargeable - b.from) * b.rate)) / MONTHS_PER_YEAR)
     }
   }
-
   return 0
 }
 
 export function calculatePayroll(input: PayrollInput): PayrollOutput {
-  const { basicSalary, allowanceAmount, overtimePay, commissionAmount } = input
+  const { basicSalary, allowanceAmount, overtimePay, commissionAmount, bonusAmount } = input
 
-  const grossSalary = round(
-    basicSalary + allowanceAmount + overtimePay + commissionAmount
+  const customAllowances = input.customItems
+    .filter(i => i.type === "ALLOWANCE")
+    .map(i => ({ name: i.name, amount: i.amount, epfTaxable: i.epfTaxable }))
+
+  const customDeductions = input.customItems
+    .filter(i => i.type === "DEDUCTION")
+    .map(i => ({ name: i.name, amount: i.amount, epfTaxable: i.epfTaxable }))
+
+  const totalCustomAllowances = customAllowances.reduce((s, i) => s + i.amount, 0)
+  const totalCustomDeductions = customDeductions.reduce((s, i) => s + i.amount, 0)
+
+  const grossSalary = r(
+    basicSalary + allowanceAmount + overtimePay + commissionAmount + bonusAmount + totalCustomAllowances
   )
 
-  const epf = calcEpf(grossSalary, input.epfEmployeeRate, input.config, input.enteredAfter55)
-  const socso = calcSocso(grossSalary, input.config)
-  const eis = calcEis(grossSalary, input.config, input.eisNoContribution57)
+  const epfTaxableAllowances = customAllowances
+    .filter(i => i.epfTaxable)
+    .reduce((s, i) => s + i.amount, 0)
+
+  const epfGross = r(basicSalary + allowanceAmount + epfTaxableAllowances + commissionAmount + bonusAmount)
+
+  const epf = calcEpf(epfGross, input.salaryConfig, input.statutoryConfig, input.enteredAfter55)
+
+  const socso = calcSocsoFromTable(
+    grossSalary, input.age, input.category,
+    input.enteredAfter55, input.workerType, input.month, input.year
+  )
+
+  const eis = calcEisFromTable(
+    grossSalary, input.age, input.eisNoContribution57, input.workerType
+  )
 
   const pcbAmount = calcPcb(
-    grossSalary,
-    epf.employee,
-    input.pcbMaritalStatus,
-    input.pcbChildrenCount,
-    input.config
+    grossSalary, epf.employee,
+    input.pcbMaritalStatus, input.pcbChildrenCount, input.statutoryConfig
   )
 
-  const totalDeductions = round(
-    epf.employee + socso.employee + eis.employee + pcbAmount
+  const totalDeductions = r(
+    epf.employee + socso.employee + eis.employee +
+    pcbAmount + input.loanDeductionTotal +
+    input.attendanceDeduction + totalCustomDeductions
   )
-  const netSalary = round(grossSalary - totalDeductions)
+
+  const netSalary = r(grossSalary - totalDeductions)
 
   return {
-    basicSalary: round(basicSalary),
-    allowanceAmount: round(allowanceAmount),
-    overtimePay: round(overtimePay),
-    commissionAmount: round(commissionAmount),
+    basicSalary: r(basicSalary),
+    allowanceAmount: r(allowanceAmount),
+    overtimeHours: input.overtimeHours,
+    overtimePay: r(overtimePay),
+    commissionAmount: r(commissionAmount),
+    bonusAmount: r(bonusAmount),
+    customAllowances,
+    customDeductions,
     grossSalary,
     epfEmployee: epf.employee,
     epfEmployer: epf.employer,
@@ -191,23 +255,11 @@ export function calculatePayroll(input: PayrollInput): PayrollOutput {
     eisEmployee: eis.employee,
     eisEmployer: eis.employer,
     pcbAmount,
+    loanDeduction: input.loanDeductionTotal,
+    attendanceDeduction: input.attendanceDeduction,
     totalDeductions,
     netSalary,
-  }
-}
-
-export function getDefaultConfig(): StatutoryConfig {
-  return {
-    epfEmployeeRate: 0.11,
-    epfEmployerRate: 0.12,
-    epfEmployerRate2: 0.13,
-    epfWageCeiling: 5000,
-    socsoEmployeeRate: 0.005,
-    socsoEmployerRate: 0.0175,
-    socsoWageCeiling: 5000,
-    eisEmployeeRate: 0.002,
-    eisEmployerRate: 0.002,
-    eisWageCeiling: 5000,
-    pcbEpfReliefCap: 4000,
+    epfEmployeeRateUsed: epf.empRate,
+    epfEmployerRateUsed: epf.emplRate,
   }
 }

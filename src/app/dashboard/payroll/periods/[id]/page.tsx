@@ -103,6 +103,12 @@ export default async function PayrollPeriodDetailPage({ params }: { params: { id
                     PCB
                   </th>
                   <th className="text-right px-4 py-3 text-xs font-bold text-slate-400 uppercase">
+                    Pinjaman
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-400 uppercase">
+                    Absen
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-400 uppercase">
                     Potongan
                   </th>
                   <th className="text-right px-4 py-3 text-xs font-bold text-emerald-400 uppercase">
@@ -135,6 +141,12 @@ export default async function PayrollPeriodDetailPage({ params }: { params: { id
                     <td className="px-4 py-3 text-right text-slate-400 tabular-nums">
                       {Number(pe.pcbAmount).toFixed(2)}
                     </td>
+                    <td className="px-4 py-3 text-right text-amber-400 tabular-nums">
+                      {Number(pe.loanDeduction).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-orange-400 tabular-nums">
+                      {Number(pe.attendanceDeduction).toFixed(2)}
+                    </td>
                     <td className="px-4 py-3 text-right text-red-400 tabular-nums">
                       {Number(pe.totalDeductions).toFixed(2)}
                     </td>
@@ -150,7 +162,7 @@ export default async function PayrollPeriodDetailPage({ params }: { params: { id
                   <td className="px-4 py-3 text-right font-bold text-white tabular-nums">
                     {Number(period.totalGross).toFixed(2)}
                   </td>
-                  <td colSpan={5} />
+                  <td colSpan={7} />
                   <td className="px-4 py-3 text-right font-bold text-red-400 tabular-nums">
                     {Number(period.totalDeductions).toFixed(2)}
                   </td>
