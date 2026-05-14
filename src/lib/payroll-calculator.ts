@@ -136,9 +136,9 @@ function calcSocsoFromTable(
   const isJenisKedua = age >= 60 || category === "JENIS2" || enteredAfter55
 
   if (isForeigner) {
-    const skbbkRate = getSkbbkRate(month, year)
+    const skbbkInfo = getSkbbkRate(month, year)
     const socsoEmployer = r(lookup.jp_se)
-    const skbbkPortion = r(socsoEmployer * skbbkRate)
+    const skbbkPortion = r(socsoEmployer * skbbkInfo.rate)
     return { employee: 0, employer: r(socsoEmployer + skbbkPortion) }
   }
 
