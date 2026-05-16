@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
-import { ArrowLeft, Download } from "lucide-react"
+import { ArrowLeft, ChevronRight } from "lucide-react"
 
 export default async function PayrollPeriodDetailPage({ params }: { params: { id: string } }) {
   const session = await auth()
@@ -111,19 +111,21 @@ export default async function PayrollPeriodDetailPage({ params }: { params: { id
                   <th className="text-right px-4 py-3 text-xs font-bold text-slate-400 uppercase">
                     Potongan
                   </th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-emerald-400 uppercase">
-                    Gaji Bersih
-                  </th>
-                </tr>
+                    <th className="text-right px-4 py-3 text-xs font-bold text-emerald-400 uppercase">
+                      Gaji Bersih
+                    </th>
+                    <th className="px-4 py-3" />
+                  </tr>
               </thead>
               <tbody>
                 {period.payrollEmployees.map((pe) => (
                   <tr
                     key={pe.id}
-                    className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors"
+                    className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors cursor-pointer group"
+                    onClick={() => window.location.href = `/dashboard/payroll/payslips/${pe.id}`}
                   >
                     <td className="px-4 py-3">
-                      <p className="font-medium text-white">{pe.employee.name}</p>
+                      <p className="font-medium text-white group-hover:text-emerald-300">{pe.employee.name}</p>
                       <p className="text-xs text-slate-500">{pe.employee.icNumber}</p>
                     </td>
                     <td className="px-4 py-3 text-right text-white tabular-nums">
@@ -152,6 +154,9 @@ export default async function PayrollPeriodDetailPage({ params }: { params: { id
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-emerald-400 tabular-nums">
                       {Number(pe.netSalary).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-white transition-colors" />
                     </td>
                   </tr>
                 ))}
