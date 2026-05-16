@@ -62,7 +62,7 @@ export default function PayItemsPage() {
             <option value="DEDUCTION">Potongan</option>
           </select>
           <label className="flex items-center gap-2 text-xs text-slate-400 h-10">
-            <input type="checkbox" checked={epfTaxable} onChange={e => setEpfTaxable(e.target.checked)} className="rounded" /> KWSP
+            <input type="checkbox" checked={epfTaxable} onChange={e => setEpfTaxable(e.target.checked)} className="rounded" /> Asas KWSP
           </label>
           <button type="submit" className="h-10 px-4 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-300 text-sm font-bold hover:bg-blue-500/30">
             <Plus className="w-4 h-4" />
@@ -79,7 +79,7 @@ export default function PayItemsPage() {
                   {item.type === "ALLOWANCE" ? "ELAUN" : "POTONGAN"}
                 </span>
                 <span className="text-sm text-white">{item.name}</span>
-                {item.epfTaxable && <span className="text-[10px] text-blue-400">KWSP</span>}
+                {item.epfTaxable && <span className="text-[10px] text-blue-400">Asas KWSP</span>}
               </div>
               <button onClick={() => remove(item.id)} className="text-slate-600 hover:text-red-400 transition-colors">
                 <Trash2 className="w-4 h-4" />
