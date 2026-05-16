@@ -111,7 +111,7 @@ export default async function SalaryConfigPage() {
           <h3 className="font-bold text-blue-400 mb-2">Nota</h3>
           <ul className="text-sm text-slate-400 space-y-1">
             <li>• Kadar default KWSP pekerja: 11%</li>
-            <li>• Kadar default KWSP majikan: 12% (gaji ≤ RM5,000) atau 13% (gaji > RM5,000)</li>
+            <li>• Kadar default KWSP majikan: 12% (gaji ≤ RM5,000) atau 13% (gaji {'>'} RM5,000)</li>
             <li>• Pekerja yang masuk selepas umur 55 tahun: hanya majikan 4%, pekerja 0%</li>
             <li>• Untuk tukar kadar, sila hubungi admin atau guna API endpoint</li>
           </ul>
