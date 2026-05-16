@@ -25,6 +25,10 @@ export async function GET(req: Request) {
 
   const employees = await db.employee.findMany({
     where: { employerId, isActive: true },
+    include: {
+      salaryConfig: true,
+      loans: { where: { status: "ACTIVE" } },
+    },
     orderBy: { name: "asc" },
   })
 

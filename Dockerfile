@@ -32,17 +32,8 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 RUN apk add --no-cache curl
-
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
-COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
-COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./next.config.js
-
-RUN npm install -g prisma@6 ts-node typescript @types/node
-RUN mkdir -p /app/node_modules/.bin && ln -sf /usr/local/bin/prisma /app/node_modules/.bin/prisma && ln -sf /usr/local/bin/ts-node /app/node_modules/.bin/ts-node && ln -sf /usr/local/bin/tsc /app/node_modules/.bin/tsc
+RUN npm install -g prisma@6 tsx typescript @types/node
+RUN mkdir -p /app/node_modules/.bin && ln -sf /usr/local/bin/prisma /app/node_modules/.bin/prisma && ln -sf /usr/local/bin/tsx /app/node_modules/.bin/tsx && ln -sf /usr/local/bin/tsc /app/node_modules/.bin/tsc
 RUN chown -R nextjs:nodejs /app/node_modules/.bin
 
 USER nextjs

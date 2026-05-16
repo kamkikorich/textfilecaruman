@@ -107,7 +107,8 @@ export default async function PayrollPage() {
               "use server"
               const month = formData.get("month") as string
               const year = formData.get("year") as string
-              redirect(`/dashboard/payroll/run?month=${month}&year=${year}`)
+              const workingDays = formData.get("workingDays") as string
+              redirect(`/dashboard/payroll/run?month=${month}&year=${year}&workingDays=${workingDays || 26}`)
             }}
             className="flex flex-wrap items-end gap-3"
           >
@@ -147,6 +148,13 @@ export default async function PayrollPage() {
             <div>
               <p className="text-sm font-bold text-white group-hover:text-amber-300">Pinjaman</p>
               <p className="text-[10px] text-slate-500">Urus pinjaman pekerja</p>
+            </div>
+          </Link>
+          <Link href="/dashboard/payroll/salary-config" className="flex items-center gap-3 p-4 rounded-xl border border-white/[0.08] bg-slate-900/80 hover:bg-slate-800/80 transition-colors group">
+            <DollarSign className="w-5 h-5 text-purple-400" />
+            <div>
+              <p className="text-sm font-bold text-white group-hover:text-purple-300">KWSP Config</p>
+              <p className="text-[10px] text-slate-500">Kadar KWSP custom per pekerja</p>
             </div>
           </Link>
         </div>

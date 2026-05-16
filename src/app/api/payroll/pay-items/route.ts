@@ -6,7 +6,16 @@ export async function GET(req: Request) {
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const employer = await db.employer.findFirst({ where: { userId: session.user.id } })
+  const { searchParams } = new URL(req.url)
+  const employerId = searchParams.get("employerId")
+
+  let employer
+  if (employerId) {
+    employer = await db.employer.findFirst({ where: { id: employerId, userId: session.user.id } })
+  } else {
+    employer = await db.employer.findFirst({ where: { userId: session.user.id } })
+  }
+
   if (!employer) return NextResponse.json({ error: "Employer not found" }, { status: 404 })
 
   const items = await db.payItemTemplate.findMany({

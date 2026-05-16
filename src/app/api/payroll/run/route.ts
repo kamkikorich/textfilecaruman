@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json()
-  const { employerId, month, year, workingDays, attendanceMap } = body
+  const { employerId, month, year, workingDays, attendanceMap, customPayItems, preview } = body
 
   if (!employerId || !month || !year) {
     return NextResponse.json({ error: "employerId, month, year required" }, { status: 400 })
@@ -23,11 +23,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Employer not found" }, { status: 404 })
   }
 
-  const existing = await db.payrollPeriod.findUnique({
-    where: { employerId_month_year: { employerId, month, year } },
-  })
-  if (existing) {
-    return NextResponse.json({ error: "Slip gaji untuk bulan ini sudah wujud" }, { status: 409 })
+  if (!preview) {
+    const existing = await db.payrollPeriod.findUnique({
+      where: { employerId_month_year: { employerId, month, year } },
+    })
+    if (existing) {
+      return NextResponse.json({ error: "Slip gaji untuk bulan ini sudah wujud" }, { status: 409 })
+    }
   }
 
   const employees = await db.employee.findMany({
@@ -55,6 +57,123 @@ export async function POST(req: Request) {
 
   const effectiveWorkingDays = workingDays || 26
 
+  const employeeResults: {
+    employeeId: string
+    employeeName: string
+    icNumber: string
+    grossSalary: number
+    epfEmployee: number
+    epfEmployer: number
+    socsoEmployee: number
+    socsoEmployer: number
+    eisEmployee: number
+    eisEmployer: number
+    pcbAmount: number
+    loanDeduction: number
+    attendanceDeduction: number
+    totalDeductions: number
+    netSalary: number
+  }[] = []
+
+  let totalGross = 0
+  let totalDeductions = 0
+  let totalNet = 0
+
+  for (const emp of employees) {
+    const empOvertime = overtimeEntries.filter(o => o.employeeId === emp.id)
+    const overtimePay = empOvertime.reduce((s, o) => s + Number(o.amount), 0)
+    const overtimeHours = empOvertime.reduce((s, o) => s + Number(o.hours), 0)
+
+    const basicSalary = emp.basicSalary ? Number(emp.basicSalary) : Number(emp.salary)
+
+    const salaryConfig = emp.salaryConfig
+      ? {
+          epfEmployeeRate: emp.salaryConfig.epfEmployeeRate ? Number(emp.salaryConfig.epfEmployeeRate) : null,
+          epfEmployerRate: emp.salaryConfig.epfEmployerRate ? Number(emp.salaryConfig.epfEmployerRate) : null,
+        }
+      : null
+
+    const loanDeductionTotal = emp.loans.reduce((s, loan) => s + Number(loan.monthlyDeduction), 0)
+
+    const attKey = emp.id
+    const att = attendanceMap?.[attKey]
+    let attendanceDeduction = 0
+    if (att && (att.absentDays > 0 || att.lateHours > 0)) {
+      const dailyRate = basicSalary / effectiveWorkingDays
+      const absentAmount = (att.absentDays || 0) * dailyRate
+      const hourlyRate = dailyRate / 8
+      const lateAmount = (att.lateHours || 0) * hourlyRate
+      attendanceDeduction = Math.round((absentAmount + lateAmount) * 100) / 100
+    }
+
+    const age = emp.dateOfBirth
+      ? new Date().getFullYear() - new Date(emp.dateOfBirth).getFullYear()
+      : 30
+
+    const empCustomPayItems = customPayItems?.[emp.id] || {}
+    const customItems: PayItem[] = payTemplates.map(t => ({
+      name: t.name,
+      type: t.type as "ALLOWANCE" | "DEDUCTION",
+      amount: empCustomPayItems[t.id] || 0,
+      epfTaxable: t.epfTaxable,
+    }))
+
+    const payroll = calculatePayroll({
+      basicSalary,
+      allowanceAmount: Number(emp.allowanceAmount),
+      overtimePay,
+      overtimeHours,
+      commissionAmount: 0,
+      bonusAmount: 0,
+      customItems,
+      enteredAfter55: emp.enteredAfter55,
+      eisNoContribution57: emp.eisNoContribution57,
+      workerType: emp.workerType,
+      age,
+      category: emp.category,
+      month,
+      year,
+      pcbMaritalStatus: emp.pcbMaritalStatus,
+      pcbChildrenCount: emp.pcbChildrenCount,
+      salaryConfig,
+      statutoryConfig,
+      loanDeductionTotal,
+      attendanceDeduction,
+      workingDays: effectiveWorkingDays,
+    })
+
+    employeeResults.push({
+      employeeId: emp.id,
+      employeeName: emp.name,
+      icNumber: emp.icNumber,
+      grossSalary: payroll.grossSalary,
+      epfEmployee: payroll.epfEmployee,
+      epfEmployer: payroll.epfEmployer,
+      socsoEmployee: payroll.socsoEmployee,
+      socsoEmployer: payroll.socsoEmployer,
+      eisEmployee: payroll.eisEmployee,
+      eisEmployer: payroll.eisEmployer,
+      pcbAmount: payroll.pcbAmount,
+      loanDeduction: payroll.loanDeduction,
+      attendanceDeduction: payroll.attendanceDeduction,
+      totalDeductions: payroll.totalDeductions,
+      netSalary: payroll.netSalary,
+    })
+
+    totalGross += payroll.grossSalary
+    totalDeductions += payroll.totalDeductions
+    totalNet += payroll.netSalary
+  }
+
+  if (preview) {
+    return NextResponse.json({
+      employees: employeeResults,
+      totalGross,
+      totalDeductions,
+      totalNet,
+    })
+  }
+
   const period = await db.payrollPeriod.create({
     data: {
       employerId,
@@ -67,11 +186,10 @@ export async function POST(req: Request) {
     },
   })
 
-  let totalGross = 0
-  let totalDeductions = 0
-  let totalNet = 0
-
   for (const emp of employees) {
+    const result = employeeResults.find(r => r.employeeId === emp.id)
+    if (!result) continue
+
     const empOvertime = overtimeEntries.filter(o => o.employeeId === emp.id)
     const overtimePay = empOvertime.reduce((s, o) => s + Number(o.amount), 0)
     const overtimeHours = empOvertime.reduce((s, o) => s + Number(o.hours), 0)
@@ -113,10 +231,11 @@ export async function POST(req: Request) {
       ? new Date().getFullYear() - new Date(emp.dateOfBirth).getFullYear()
       : 30
 
+    const empCustomPayItems = customPayItems?.[emp.id] || {}
     const customItems: PayItem[] = payTemplates.map(t => ({
       name: t.name,
       type: t.type as "ALLOWANCE" | "DEDUCTION",
-      amount: 0,
+      amount: empCustomPayItems[t.id] || 0,
       epfTaxable: t.epfTaxable,
     }))
 
@@ -205,10 +324,6 @@ export async function POST(req: Request) {
         },
       })
     }
-
-    totalGross += payroll.grossSalary
-    totalDeductions += payroll.totalDeductions
-    totalNet += payroll.netSalary
   }
 
   if (overtimeEntries.length > 0) {
