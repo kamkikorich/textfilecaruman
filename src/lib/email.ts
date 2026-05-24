@@ -1,14 +1,22 @@
 import nodemailer from "nodemailer"
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-})
+let transporter: nodemailer.Transporter | null = null
+
+function getTransporter(): nodemailer.Transporter {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || "587"),
+      secure: process.env.SMTP_SECURE === "true",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    })
+    console.log(`[Email] SMTP transporter initialized: ${process.env.SMTP_HOST}:${process.env.SMTP_PORT}`)
+  }
+  return transporter
+}
 
 /**
  * Send email verification to user after registration
@@ -160,11 +168,11 @@ Sistem Pengurusan Caruman Digital Malaysia
   }
 
   try {
-    await transporter.sendMail(mailOptions)
-    console.log(`Verification email sent to: ${data.email}`)
+    await getTransporter().sendMail(mailOptions)
+    console.log(`[Email] Verification email sent to: ${data.email}`)
     return { success: true }
   } catch (error) {
-    console.error("Error sending verification email:", error)
+    console.error("[Email] Error sending verification email:", error)
     return { success: false, error }
   }
 }
@@ -308,11 +316,11 @@ Sistem Pengurusan Caruman Digital Malaysia
   }
 
   try {
-    await transporter.sendMail(mailOptions)
-    console.log(`Welcome email sent to: ${data.email}`)
+    await getTransporter().sendMail(mailOptions)
+    console.log(`[Email] Welcome email sent to: ${data.email}`)
     return { success: true }
   } catch (error) {
-    console.error("Error sending welcome email:", error)
+    console.error("[Email] Error sending welcome email:", error)
     return { success: false, error }
   }
 }
@@ -326,7 +334,7 @@ export async function sendAdminNotification(userData: {
   companyName?: string
   isVerified?: boolean
 }) {
-  const adminEmail = "${process.env.SMTP_USER || 'admin@example.com'}"
+  const adminEmail = `${process.env.SMTP_USER || "admin@example.com"}`
   const verificationStatus = userData.isVerified ? "✅ Disahkan" : "⏳ Belum Disahkan"
 
   const mailOptions = {
@@ -356,11 +364,11 @@ export async function sendAdminNotification(userData: {
   }
 
   try {
-    await transporter.sendMail(mailOptions)
-    console.log(`Admin notification sent for user: ${userData.email}`)
+    await getTransporter().sendMail(mailOptions)
+    console.log(`[Email] Admin notification sent for user: ${userData.email}`)
     return { success: true }
   } catch (error) {
-    console.error("Error sending admin notification email:", error)
+    console.error("[Email] Error sending admin notification email:", error)
     return { success: false, error }
   }
 }
@@ -515,11 +523,11 @@ Sistem Pengurusan Caruman Digital Malaysia
   }
 
   try {
-    await transporter.sendMail(mailOptions)
-    console.log(`Password reset email sent to: ${data.email}`)
+    await getTransporter().sendMail(mailOptions)
+    console.log(`[Email] Password reset email sent to: ${data.email}`)
     return { success: true }
   } catch (error) {
-    console.error("Error sending password reset email:", error)
+    console.error("[Email] Error sending password reset email:", error)
     return { success: false, error }
   }
 }

@@ -61,11 +61,18 @@ export async function registerUser(data: {
   })
 
   // Send verification email to user
-  await sendVerificationEmail({
+  const emailResult = await sendVerificationEmail({
     email: user.email,
     name: user.name || "",
     verificationToken: token,
   })
+
+  if (!emailResult.success) {
+    console.error("[Register] Failed to send verification email:", emailResult.error)
+    return {
+      error: "Pendaftaran berjaya tetapi email pengesahan gagal dihantar. Sila hubungi sokongan atau cuba 'Hantar Semula Email'.",
+    }
+  }
 
   // Send notification to admin (user not verified yet)
   await sendAdminNotification({
