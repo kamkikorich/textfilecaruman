@@ -1,14 +1,31 @@
 import nodemailer from "nodemailer"
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true",
-  auth: {
+let transporter: nodemailer.Transporter | null = null
+
+function getTransporter(): nodemailer.Transporter {
+  if (transporter) return transporter
+
+  console.log("[Email] Initializing SMTP transporter:", {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: process.env.SMTP_SECURE,
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-})
+  })
+
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || "587"),
+    secure: process.env.SMTP_SECURE === "true",
+    debug: true,
+    logger: true,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
+  })
+
+  return transporter
+}
 
 /**
  * Send email verification to user after registration
@@ -160,11 +177,21 @@ Sistem Pengurusan Caruman Digital Malaysia
   }
 
   try {
-    await transporter.sendMail(mailOptions)
-    console.log(`Verification email sent to: ${data.email}`)
+    const info = await getTransporter().sendMail(mailOptions)
+    console.log(`[Email] Verification email sent to: ${data.email}`, {
+      messageId: info.messageId,
+      rejected: info.rejected,
+    })
     return { success: true }
-  } catch (error) {
-    console.error("Error sending verification email:", error)
+  } catch (error: any) {
+    console.error("[Email] Verification email failed:", {
+      to: data.email,
+      code: error.code,
+      message: error.message,
+      responseCode: error.responseCode,
+      response: error.response,
+      command: error.command,
+    })
     return { success: false, error }
   }
 }
@@ -308,11 +335,21 @@ Sistem Pengurusan Caruman Digital Malaysia
   }
 
   try {
-    await transporter.sendMail(mailOptions)
-    console.log(`Welcome email sent to: ${data.email}`)
+    const info = await getTransporter().sendMail(mailOptions)
+    console.log(`[Email] Welcome email sent to: ${data.email}`, {
+      messageId: info.messageId,
+      rejected: info.rejected,
+    })
     return { success: true }
-  } catch (error) {
-    console.error("Error sending welcome email:", error)
+  } catch (error: any) {
+    console.error("[Email] Welcome email failed:", {
+      to: data.email,
+      code: error.code,
+      message: error.message,
+      responseCode: error.responseCode,
+      response: error.response,
+      command: error.command,
+    })
     return { success: false, error }
   }
 }
@@ -326,7 +363,7 @@ export async function sendAdminNotification(userData: {
   companyName?: string
   isVerified?: boolean
 }) {
-  const adminEmail = "${process.env.SMTP_USER || 'admin@example.com'}"
+  const adminEmail = `${process.env.SMTP_USER || "admin@example.com"}`
   const verificationStatus = userData.isVerified ? "✅ Disahkan" : "⏳ Belum Disahkan"
 
   const mailOptions = {
@@ -356,11 +393,22 @@ export async function sendAdminNotification(userData: {
   }
 
   try {
-    await transporter.sendMail(mailOptions)
-    console.log(`Admin notification sent for user: ${userData.email}`)
+    const info = await getTransporter().sendMail(mailOptions)
+    console.log(`[Email] Admin notification sent for: ${userData.email}`, {
+      messageId: info.messageId,
+      rejected: info.rejected,
+    })
     return { success: true }
-  } catch (error) {
-    console.error("Error sending admin notification email:", error)
+  } catch (error: any) {
+    console.error("[Email] Admin notification failed:", {
+      user: userData.email,
+      adminTo: adminEmail,
+      code: error.code,
+      message: error.message,
+      responseCode: error.responseCode,
+      response: error.response,
+      command: error.command,
+    })
     return { success: false, error }
   }
 }
@@ -515,11 +563,21 @@ Sistem Pengurusan Caruman Digital Malaysia
   }
 
   try {
-    await transporter.sendMail(mailOptions)
-    console.log(`Password reset email sent to: ${data.email}`)
+    const info = await getTransporter().sendMail(mailOptions)
+    console.log(`[Email] Password reset email sent to: ${data.email}`, {
+      messageId: info.messageId,
+      rejected: info.rejected,
+    })
     return { success: true }
-  } catch (error) {
-    console.error("Error sending password reset email:", error)
+  } catch (error: any) {
+    console.error("[Email] Password reset email failed:", {
+      to: data.email,
+      code: error.code,
+      message: error.message,
+      responseCode: error.responseCode,
+      response: error.response,
+      command: error.command,
+    })
     return { success: false, error }
   }
 }
